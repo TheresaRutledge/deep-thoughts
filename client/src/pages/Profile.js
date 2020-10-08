@@ -1,13 +1,16 @@
 import React from 'react';
+import { Redirect, useParams } from 'react-router-dom';
 import { QUERY_USER, QUERY_ME } from '../utils/queries';
-import { useQuery } from '@apollo/react-hooks';
+import { useMutation, useQuery} from '@apollo/react-hooks';
+import { ADD_FRIEND } from '../utils/mutations'
 import ThoughtList from '../components/ThoughtList';
 import FriendList from '../components/FriendList';
 import Auth from '../utils/auth';
-import { Redirect, useParams } from 'react-router-dom';
+
 
 
 const Profile = () => {
+  const [addFriend] = useMutation(ADD_FRIEND);
   const { username } = useParams();
   const { loading, data } = useQuery(username ? QUERY_USER : QUERY_ME, {
     variables: { username }
@@ -15,10 +18,20 @@ const Profile = () => {
 
   const user = data?.me || data?.user || {};
 
+  const handleClick = async()=>{
+    try {
+      await addFriend({
+        variables:{id:user._id}
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   // redirect to personal profile page if username is the logged-in user's
-if (Auth.loggedIn() && Auth.getProfile().data.username === username) {
-  return <Redirect to="/profile" />;
-}
+  if (Auth.loggedIn() && Auth.getProfile().data.username === username) {
+    return <Redirect to="/profile" />;
+  }
 
   if (loading) {
     return <div>Loading...</div>
@@ -31,20 +44,25 @@ if (Auth.loggedIn() && Auth.getProfile().data.username === username) {
       </h4>
     );
   }
-  
+
   return (
     <div>
       <div className="flex-row mb-3">
         <h2 className="bg-dark text-secondary p-3 display-inline-block">
           Viewing {username ? `${user.username}'s` : 'your'} profile
         </h2>
+        {username && (
+        <button className="btn ml-auto" onClick={handleClick}>
+          Add Friend
+  </button>
+        )}
       </div>
 
       <div className="flex-row justify-space-between mb-3">
         <div className="col-12 mb-3 col-lg-8">
           {/* Print thought list */}
-            <ThoughtList thoughts={user.thoughts} title={`${user.username}'s thoughts...`} />
-          
+          <ThoughtList thoughts={user.thoughts} title={`${user.username}'s thoughts...`} />
+
         </div>
         <div className="col-12 col-lg-3 mb-3">
           {/* Print friend list */}
