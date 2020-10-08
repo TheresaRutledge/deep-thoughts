@@ -6,6 +6,7 @@ import { ADD_FRIEND } from '../utils/mutations'
 import ThoughtList from '../components/ThoughtList';
 import FriendList from '../components/FriendList';
 import Auth from '../utils/auth';
+import ThoughtForm from '../components/ThoughtForm';
 
 
 
@@ -24,7 +25,7 @@ const Profile = () => {
         variables:{id:user._id}
       });
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -75,6 +76,7 @@ const Profile = () => {
 
         <div className="col-12 col-lg-3 mb-3">{/* PRINT FRIEND LIST */}</div>
       </div>
+      <div className="mb-3">{!username && <ThoughtForm />}</div>
     </div>
   );
 };
